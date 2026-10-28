@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enredados | Una Cita Mágica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-night: #06040d;
+            --night-sky: #120924;
+            --lantern-glow: #ffb703;
+            --lantern-warm: #fb8500;
+            --lantern-red: #d90429;
+            --text-gold: #ffe19c;
+            --cream-paper: #fbf6ec;
+            --cream-dark: #f0e6d2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none;
+        }
+
+        body {
+            background: radial-gradient(circle at 50% 30%, #1a0f35 0%, var(--night-sky) 50%, var(--deep-night) 100%);
+            color: #f3f0ff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- CURSOR MÁGICO --- */
+        .custom-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 16px;
+            height: 16px;
+            background: #ffffff;
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            box-shadow: 0 0 15px var(--lantern-glow), 0 0 30px var(--lantern-warm);
+        }
+
+        .cursor-trail {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            background: var(--lantern-glow);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 9998;
+            opacity: 0.6;
+        }
+
+        /* --- FONDO DE LINTERNAS --- */
+        .lanterns-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .tangled-lantern {
+            position: absolute;
+            width: 34px;
+            height: 48px;
+            border-radius: 8px 8px 12px 12px;
+            background: radial-gradient(circle at 50% 70%, #fff 0%, var(--lantern-glow) 45%, var(--lantern-warm) 80%, var(--lantern-red) 100%);
+            box-shadow: 0 0 20px rgba(255, 183, 3, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.9);
+            animation: floatAndSway 14s infinite ease-in-out;
+            opacity: 0.8;
+        }
+
+        @keyframes floatAndSway {
+            0% { transform: translateY(105vh) translateX(0) scale(0.7) rotate(-3deg); opacity: 0; }
+            15% { opacity: 0.95; }
+            85% { opacity: 0.95; }
+            100% { transform: translateY(-10vh) translateX(-20px) scale(1.1) rotate(-2deg); opacity: 0; }
+        }
+
+        /* --- LINTERNA GIGANTE DE TRANSICIÓN --- */
+        .giant-lantern-transition {
+            position: fixed;
+            bottom: -300px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 280px;
+            background: radial-gradient(circle at 50% 50%, #ffffff 0%, var(--lantern-glow) 40%, var(--lantern-warm) 75%, var(--lantern-red) 100%);
+            border-radius: 35px 35px 50px 50px;
+            box-shadow: 0 0 120px rgba(255, 183, 3, 0.95), 0 0 250px rgba(251, 133, 0, 0.8);
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none;
+            transition: none;
+        }
+
+        .giant-lantern-transition.fly-up {
+            opacity: 1;
+            bottom: 130vh;
+            transition: bottom 2.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease-in;
+        }
+
+        /* --- CONTENEDOR DE PASOS --- */
+        .step-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 650px;
+            padding: 20px;
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        .step-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- TARJETAS --- */
+        .card {
+            background: rgba(18, 9, 36, 0.8);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 225, 156, 0.3);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(157, 78, 221, 0.3);
+        }
+
+        h1, h2 {
+            font-family: 'Cinzel', serif;
+            color: var(--text-gold);
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 183, 3, 0.5);
+        }
+
+        p {
+            color: #d1c4e9;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+
+        /* --- BOTONES --- */
+        .btn-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .magic-btn {
+            background: linear-gradient(135deg, var(--lantern-glow), var(--lantern-warm));
+            color: #120924;
+            border: none;
+            padding: 14px 32px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 30px;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(255, 183, 3, 0.4);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .magic-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 30px var(--lantern-glow);
+        }
+
+        .magic-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-gold);
+            border: 1px solid rgba(255, 225, 156, 0.4);
+        }
+
+        .magic-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 225, 156, 0.2);
+        }
+
+        #noBtn {
+            position: relative;
+            transition: 0.2s;
+        }
+
+        /* --- SELECTORES MANUALES FECHA Y HORA --- */
+        .datetime-selects {
+            display: flex;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-gold);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 225, 156, 0.2);
+            border-radius: 12px;
+            color: #fff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .form-control option {
+            background: #120924;
+            color: #fff;
+        }
+
+        .form-control:focus {
+            border-color: var(--lantern-glow);
+            box-shadow: 0 0 15px rgba(255, 183, 3, 0.3);
+        }
+
+        /* --- ESTILO ARCHIVO / FICHERO CON SOLAPAS (SEPARADAS Y AMPLIABLES) --- */
+        .file-box {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Buen espacio para que no se tapen */
+            margin-top: 15px;
+        }
+
+        .file-card {
+            background: linear-gradient(135deg, var(--cream-paper), var(--cream-dark));
+            color: #3b1c0d;
+            border-radius: 14px;
+            padding: 18px 25px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transition: all 0.4s ease;
+            position: relative;
+            border: 2px solid #d4c3a3;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Solapa superior tipo expediente */
+        .file-card::before {
+            content: attr(data-tab);
+            position: absolute;
+            top: -24px;
+            left: 20px;
+            background: #e6d5b8;
+            color: #3b1c0d;
+            padding: 4px 14px;
+            font-size: 0.8rem;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            border-radius: 8px 8px 0 0;
+            border-top: 2px solid #c9b48f;
+            border-left: 2px solid #c9b48f;
+            border-right: 2px solid #c9b48f;
+            box-shadow: 0 -3px 5px rgba(0,0,0,0.1);
+        }
+
+        .file-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(255, 183, 3, 0.5);
+        }
+
+        .file-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .file-icon {
+            font-size: 1.4rem;
+            background: rgba(59, 28, 13, 0.1);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* --- MODAL / EXPEDIENTE EXPANDIDO EN GRANDE EN LA PANTALLA --- */
+        .expanded-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(6, 4, 13, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .expanded-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .expanded-content {
+            background: linear-gradient(135deg, var(--cream-paper), var(--cream-dark));
+            color: #3b1c0d;
+            width: 90%;
+            max-width: 480px;
+            padding: 35px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px var(--lantern-glow);
+            transform: scale(0.7);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid #c9b48f;
+            position: relative;
+        }
+
+        .expanded-modal.active .expanded-content {
+            transform: scale(1);
+        }
+
+        .expanded-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            border: 2px solid #d4c3a3;
+        }
+
+        .expanded-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2c1654;
+        }
+
+        .expanded-question {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            font-weight: 600;
+            color: #5a3825;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cursor personalizado -->
+    <div class="custom-cursor" id="cursor"></div>
+    <div class="cursor-trail" id="trail"></div>
+
+    <!-- Fondo de Linternas -->
+    <div class="lanterns-container" id="lanternsContainer"></div>
+
+    <!-- Linterna gigante de transición -->
+    <div class="giant-lantern-transition" id="giantLantern"></div>
+
+    <!-- MODAL EXPANDIDO (EXPEDIENTE SECRETO EN GRANDE) -->
+    <div class="expanded-modal" id="expandedModal">
+        <div class="expanded-content">
+            <img id="modalImg" src="" alt="Plato" class="expanded-img">
+            <h3 id="modalTitle" class="expanded-title">Título</h3>
+            <p class="expanded-question">¿Te gusta esta opción?</p>
+            <div class="btn-group">
+                <button class="magic-btn" id="modalAcceptBtn">¡Sí, me encanta! ✨</button>
+                <button class="magic-btn secondary" style="color: #3b1c0d; border-color: #3b1c0d;" onclick="closeModal()">Prefiero otra 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= PASO 1 ================= -->
+    <div class="step-container active" id="step1">
+        <div class="card">
+            <h1>Cande</h1>
+            <p style="font-size: 1.4rem; font-family: 'Cinzel', serif; color: #fff;">¿Querés cenar conmigo?</p>
+            <div class="btn-group">
+                <button class="magic-btn" onclick="nextStepWithLantern(2)">¡Sí, obvio! ❤️</button>
+                <button class="magic-btn secondary" id="noBtn" onmouseover="moveNoButton()" onclick="alert('¡Ese botón no vale, elegí el otro! 😉')">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= PASO 2 ================= -->
+    <div class="step-container" id="step2">
+        <div class="card">
+            <h2>Elige el Momento Mágico</h2>
+            <p>Selecciona cuándo te parece mejor:</p>
+            
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>Fecha </label>
+                <div class="datetime-selects">
+                    <select id="selectDay" class="form-control"><option value="">Día</option></select>
+                    <select id="selectMonth" class="form-control">
+                        <option value="">Mes</option>
+                        <option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option>
+                        <option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option>
+                        <option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option>
+                        <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                    </select>
+                    <select id="selectYear" class="form-control">
+                        <option value="">Año</option>
+                        <option value="2026">2026</option><option value="2027">2027</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 25px;">
+                <label>Hora </label>
+                <div class="datetime-selects">
+                    <select id="selectHour" class="form-control"><option value="">Hora</option></select>
+                    <select id="selectMinute" class="form-control">
+                        <option value="00">00 min</option><option value="15">15 min</option>
+                        <option value="30">30 min</option><option value="45">45 min</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="magic-btn" style="width: 100%;" onclick="saveDateTime()">Continuar al Archivo del Menú</button>
+        </div>
+    </div>
+
+    <!-- ================= PASO 3: MENÚ (EXPEDIENTES SEPARADOS) ================= -->
+    <div class="step-container" id="step3">
+        <div class="card">
+            <h2>Archivo del Menú</h2>
+            <p>Toca una ficha para saber que es:</p>
+            
+            <div class="file-box">
+                <div class="file-card" data-tab="EXPEDIENTE 01" onclick="openModal('Opción 1: Ratatouille', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8JwGtJG7bG4U7Rq0ACWYNdY24VyJXbgIaqghQwYf57_m93kb0okMVh3YAbE1-s_a4ED7bIk5sODOMaGZhXc-77W1bjIMRk8rAMxuyIWQ&s=10', 'Cena')">
+                    <span class="file-title">Menú N° 1</span>
+                    <span class="file-icon">📂</span>
+                </div>
+
+                <div class="file-card" data-tab="EXPEDIENTE 02" onclick="openModal('Opción 2: Sopa de papa y puerro', 'https://www.parati.com.ar/wp-content/uploads/2025/04/Diseno-sin-titulo-22-2.jpg.webp?v=2', 'Cena')">
+                    <span class="file-title">Menú N° 2</span>
+                    <span class="file-icon">📂</span>
+                </div>
+
+                <div class="file-card" data-tab="EXPEDIENTE 03" onclick="openModal('Opción 3: Espaguetis «Bella Notte»', 'https://img-global.cpcdn.com/recipes/138af2c71e219caa/1200x630cq80/photo.jpg', 'Cena')">
+                    <span class="file-title">Menú N° 3</span>
+                    <span class="file-icon">📂</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= PASO 4: POSTRES (EXPEDIENTES SEPARADOS) ================= -->
+    <div class="step-container" id="step4">
+        <div class="card">
+            <h2>Archivo del Postre</h2>
+            <p>Toca una ficha para saber que es:</p>
+            
+            <div class="file-box">
+                <div class="file-card" data-tab="DULCE 01" onclick="openModal('Opción 1: Tarta de arandanos', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6uecoHR3PLatT89Nd1XwybhkKgJ2vYUi7akaEaqFw2A&s=10', 'Postre')">
+                    <span class="file-title">Postre A</span>
+                    <span class="file-icon">📂</span>
+                </div>
+
+                <div class="file-card" data-tab="DULCE 02" onclick="openModal('Opción 2: Galletas Empire Biscuit', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTL3bgWn0BV-i_1ooNzhIpAiESFeyb96mCNPypK-YRuVA&s=10', 'Postre')">
+                    <span class="file-title">Postre B</span>
+                    <span class="file-icon">📂</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= PASO 5: CONFIRMACIÓN FINAL ================= -->
+    <div class="step-container" id="step5">
+        <div class="card">
+            <h2>¿Confirmamos la fecha? </h2>
+            <p>Ahora sí, todo está listo.</p>
+            <div class="btn-group">
+                <button class="magic-btn" onclick="sendFinalData(true)">¡Sí, confirmo todo! ❤️</button>
+                <button class="magic-btn secondary" onclick="sendFinalData(false)">Lo pasamos para otro día mejor</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= PASO 6: FINAL ================= -->
+    <div class="step-container" id="step6">
+        <div class="card" style="text-align: center;">
+            <h1 style="font-size: 2.5rem; color: var(--lantern-glow);">¡Te espero! ✨</h1>
+            <p style="font-size: 1.2rem; margin-top: 15px;">"Y de pronto, todo empieza a cobrar sentido..." 🏮</p>
+        </div>
+    </div>
+
+    <!-- FORMULARIO OCULTO PARA ENVIAR A FORMSPREE -->
+    <form id="hiddenForm" action="https://formspree.io/f/mljjnzjr" method="POST" style="display:none;">
+        <input type="hidden" name="Invitada" value="Cande">
+        <input type="hidden" name="Fecha" id="mailDate">
+        <input type="hidden" name="Hora" id="mailTime">
+        <input type="hidden" name="Cena" id="mailCena">
+        <input type="hidden" name="Postre" id="mailPostre">
+    </form>
+
+    <script>
+        // --- LLENAR SELECTORES DE DÍAS Y HORAS ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const daySelect = document.getElementById('selectDay');
+            for(let i = 1; i <= 31; i++) {
+                let dayVal = i < 10 ? '0' + i : i;
+                let opt = document.createElement('option');
+                opt.value = dayVal;
+                opt.innerText = i;
+                daySelect.appendChild(opt);
+            }
+
+            const hourSelect = document.getElementById('selectHour');
+            for(let h = 0; h < 24; h++) {
+                let hourVal = h < 10 ? '0' + h : h;
+                let opt = document.createElement('option');
+                opt.value = hourVal;
+                opt.innerText = hourVal + ' hs';
+                hourSelect.appendChild(opt);
+            }
+        });
+
+        // --- CURSOR MÁGICO ---
+        const cursor = document.getElementById('cursor');
+        const trail = document.getElementById('trail');
+        let mouseX = 0, mouseY = 0, trailX = 0, trailY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            cursor.style.left = mouseX + 'px';
+            cursor.style.top = mouseY + 'px';
+        });
+
+        function animateTrail() {
+            trailX += (mouseX - trailX) * 0.25;
+            trailY += (mouseY - trailY) * 0.25;
+            trail.style.left = trailX + 'px';
+            trail.style.top = trailY + 'px';
+            requestAnimationFrame(animateTrail);
+        }
+        animateTrail();
+
+        // --- LINTERNAS FLOTANTES ---
+        const container = document.getElementById('lanternsContainer');
+        for (let i = 0; i < 18; i++) {
+            createBackgroundLantern();
+        }
+
+        function createBackgroundLantern() {
+            const lantern = document.createElement('div');
+            lantern.classList.add('tangled-lantern');
+            lantern.style.left = Math.random() * 100 + 'vw';
+            lantern.style.animationDuration = (10 + Math.random() * 10) + 's';
+            lantern.style.animationDelay = (Math.random() * 12) + 's';
+            lantern.style.transform = `scale(${0.5 + Math.random() * 0.6})`;
+            container.appendChild(lantern);
+        }
+
+        // --- BOTÓN "NO" JUGUETÓN ---
+        function moveNoButton() {
+            const noBtn = document.getElementById('noBtn');
+            const randomX = (Math.random() - 0.5) * 160;
+            const randomY = (Math.random() - 0.5) * 80;
+            noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+        }
+
+        // --- TRANSICIÓN: LINTERNA GIGANTE SUBE LENTO Y CUBRE LA PANTALLA ---
+        function nextStepWithLantern(targetStep) {
+            const giantLantern = document.getElementById('giantLantern');
+            giantLantern.classList.add('fly-up');
+
+            setTimeout(() => {
+                document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+                document.getElementById('step' + targetStep).classList.add('active');
+            }, 1200);
+
+            setTimeout(() => {
+                giantLantern.classList.remove('fly-up');
+            }, 2500);
+        }
+
+        // --- DATOS SELECCIONADOS ---
+        let bookingData = { fecha: '', hora: '', cena: '', postre: '' };
+
+        function saveDateTime() {
+            const d = document.getElementById('selectDay').value;
+            const m = document.getElementById('selectMonth').value;
+            const y = document.getElementById('selectYear').value;
+            const hh = document.getElementById('selectHour').value;
+            const mm = document.getElementById('selectMinute').value;
+
+            if(!d || !m || !y || !hh || !mm) {
+                alert('Por favor selecciona el día, mes, año y hora completa para continuar.');
+                return;
+            }
+
+            bookingData.fecha = `${d}/${m}/${y}`;
+            bookingData.hora = `${hh}:${mm} hs`;
+
+            nextStepWithLantern(3);
+        }
+
+        // --- FUNCIONES DEL MODAL EXPANDIDO (EXPEDIENTE GRANDE) ---
+        function openModal(itemName, imgUrl, type) {
+            document.getElementById('modalImg').src = imgUrl;
+            document.getElementById('modalTitle').innerText = itemName;
+            
+            const acceptBtn = document.getElementById('modalAcceptBtn');
+            acceptBtn.onclick = function() {
+                closeModal();
+                if (type === 'Cena') {
+                    bookingData.cena = itemName;
+                    nextStepWithLantern('4'); // Pasa a postres con linterna
+                } else if (type === 'Postre') {
+                    bookingData.postre = itemName;
+                    nextStepWithLantern('5'); // Pasa a confirmación final con linterna
+                }
+            };
+
+            document.getElementById('expandedModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('expandedModal').classList.remove('active');
+        }
+
+        function sendFinalData(isConfirmed) {
+            const giantLantern = document.getElementById('giantLantern');
+            giantLantern.classList.add('fly-up');
+
+            if (isConfirmed) {
+                document.getElementById('mailDate').value = bookingData.fecha;
+                document.getElementById('mailTime').value = bookingData.hora;
+                document.getElementById('mailCena').value = bookingData.cena;
+                document.getElementById('mailPostre').value = bookingData.postre;
+
+                const form = document.getElementById('hiddenForm');
+                fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { 'Accept': 'application/json' }
+                }).catch(err => console.log('Enviado'));
+            }
+
+            setTimeout(() => {
+                document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+                if (isConfirmed) {
+                    document.getElementById('step6').classList.add('active');
+                } else {
+                    document.getElementById('step1').classList.add('active');
+                }
+            }, 1200);
+
+            setTimeout(() => {
+                giantLantern.classList.remove('fly-up');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
